@@ -6,7 +6,7 @@ This repository is created in order to make the source code of the complete vers
 * After the second homework submission deadline has passed, the graphics component will also be added.
 
 ## How to utilize this repository for any subsequent homework and/or project? ##
-* Clone this repository, and start working.
+* Simply clone this repository, and start working!
 
 ### How to clone? ###
 * Click on the ellipsis on the left-panel, and select "Clone" from the list of actions.
