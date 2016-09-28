@@ -7,12 +7,12 @@ This repository is created in order to make the source code of the complete vers
 
 ## How to utilize this repository for any subsequent homework and/or project? ##
 * Clone this repository, and start working.
-** Click on the ellipsis on the left-panel, and select "Clone" from the list of actions. The following command is suggested:
+
+### How to clone? ###
+* Click on the ellipsis on the left-panel, and select "Clone" from the list of actions. The following command is suggested:
 
 ```
 #!git clone https://chthonicproject@bitbucket.org/chthonicproject/cse219hangman.git
 
-
 ```
-
-
+* On the other hand, with IntelliJ IDEA, you can simply create a new project by selecting choosing "Check out from Version Control" on its start screen, and selecting "git" from the drop down.
