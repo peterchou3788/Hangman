@@ -12,9 +12,13 @@ import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
+import javafx.scene.shape.Rectangle;
 import propertymanager.PropertyManager;
 import ui.AppMessageDialogSingleton;
 import ui.YesNoCancelDialogSingleton;
+import javafx.scene.layout.StackPane;
+import javafx.geometry.Insets;
+import javafx.scene.paint.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -126,11 +130,18 @@ public class HangmanController implements FileController {
     private void initWordGraphics(HBox guessedLetters) {
         char[] targetword = gamedata.getTargetWord().toCharArray();
         progress = new Text[targetword.length];
+
         for (int i = 0; i < progress.length; i++) {
+            StackPane stackPane = new StackPane();
             progress[i] = new Text(Character.toString(targetword[i]));
             progress[i].setVisible(false);
+            Rectangle rectangle = new Rectangle(20.0,20.0);
+            rectangle.setFill(Paint.valueOf("white"));
+            StackPane.setMargin(progress[i],new Insets(10.0,10.0,10.0,10.0));
+            stackPane.getChildren().addAll(rectangle,progress[i]);
+            guessedLetters.getChildren().add(i,stackPane);
         }
-        guessedLetters.getChildren().addAll(progress);
+
     }
 
     public void play() {
