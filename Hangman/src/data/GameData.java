@@ -117,5 +117,10 @@ public class GameData implements AppDataComponent {
         }
     }
 
+    public void decreaseRemains()
+    {
+        remainingGuesses--;
+    }
+
 
 }

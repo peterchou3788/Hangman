@@ -13,8 +13,15 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Paint;
+import javafx.scene.text.FontWeight;
 import propertymanager.PropertyManager;
 import ui.AppGUI;
+import javafx.scene.text.Text;
+import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
 
 import java.io.IOException;
 
@@ -40,6 +47,11 @@ public class Workspace extends AppWorkspaceComponent {
     HBox              remainingGuessBox; // container to display the number of remaining guesses
     Button            startGame;         // the button to start playing a game of Hangman
     HangmanController controller;
+    GridPane          gridPane;
+    Button            hintButton;
+
+    String alphabetString = "abcdefghijklmnopqrstuvwxyz";
+    char[] alphabetCharArray = alphabetString.toCharArray();
 
     /**
      * Constructor for initializing the workspace, note that this constructor
@@ -71,17 +83,45 @@ public class Workspace extends AppWorkspaceComponent {
         remainingGuessBox = new HBox();
         gameTextsPane = new VBox();
 
-        gameTextsPane.getChildren().setAll(remainingGuessBox, guessedLetters);
+        gridPane = new GridPane();
+        gridPane.setStyle("-fx-background-color: white;");
+        gridPane.setHgap(2.0);
+        gridPane.setVgap(2.0);
+
+        /*out:
+        for(int row = 0;row < 7;row++)
+        {
+            int count = 0;
+
+            for(int column = 0;column< 4;column++){
+                StackPane stack = new StackPane();
+                Rectangle rect = new Rectangle(50.0,50.0);
+                rect.setFill(Paint.valueOf("green"));
+                Text letter = new Text(Character.toString(alphabetCharArray[count]));
+                letter.setFont(Font.font(null,FontWeight.BOLD,20.0));
+                stack.getChildren().addAll(rect,letter);
+                gridPane.add(stack,row,column);
+                count++;
+                if(count > 26)
+                    break out;
+            }
+
+        }*/
+
+
+
+        gameTextsPane.getChildren().setAll(remainingGuessBox, guessedLetters,gridPane);
 
         bodyPane = new HBox();
         bodyPane.getChildren().addAll(figurePane, gameTextsPane);
 
         startGame = new Button("Start Playing");
+        hintButton = new Button("Hint");
         HBox blankBoxLeft  = new HBox();
         HBox blankBoxRight = new HBox();
         HBox.setHgrow(blankBoxLeft, Priority.ALWAYS);
         HBox.setHgrow(blankBoxRight, Priority.ALWAYS);
-        footToolbar = new ToolBar(blankBoxLeft, startGame, blankBoxRight);
+        footToolbar = new ToolBar(blankBoxLeft, startGame, blankBoxRight,hintButton);
 
         workspace = new VBox();
         workspace.getChildren().addAll(headPane, bodyPane, footToolbar);
@@ -89,6 +129,7 @@ public class Workspace extends AppWorkspaceComponent {
 
     private void setupHandlers() {
         startGame.setOnMouseClicked(e -> controller.start());
+        hintButton.setOnMouseClicked(e -> controller.getHint());
     }
 
     /**
@@ -130,12 +171,14 @@ public class Workspace extends AppWorkspaceComponent {
         return startGame;
     }
 
+    public Button getHintButton(){return hintButton;}
+
     public void reinitialize() {
         guessedLetters = new HBox();
         guessedLetters.setStyle("-fx-background-color: transparent;");
         remainingGuessBox = new HBox();
         gameTextsPane = new VBox();
-        gameTextsPane.getChildren().setAll(remainingGuessBox, guessedLetters);
+        gameTextsPane.getChildren().setAll(remainingGuessBox, guessedLetters,gridPane);
         bodyPane.getChildren().setAll(figurePane, gameTextsPane);
     }
 }
