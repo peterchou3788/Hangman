@@ -1,14 +1,17 @@
 package controller;
 
 import apptemplate.AppTemplate;
+import com.sun.tools.javac.comp.Flow;
 import data.GameData;
 import gui.Workspace;
 import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.layout.HBox;
+import javafx.scene.layout.*;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
@@ -16,9 +19,15 @@ import javafx.scene.shape.Rectangle;
 import propertymanager.PropertyManager;
 import ui.AppMessageDialogSingleton;
 import ui.YesNoCancelDialogSingleton;
-import javafx.scene.layout.StackPane;
 import javafx.geometry.Insets;
 import javafx.scene.paint.*;
+import javafx.scene.text.Font;
+import javafx.scene.shape.Circle;
+import javafx.scene.shape.Line;
+import javafx.scene.shape.Shape;
+import java.util.List;
+import java.util.ArrayList;
+
 
 import java.io.File;
 import java.io.IOException;
@@ -51,6 +60,14 @@ public class HangmanController implements FileController {
     private Path        workFile;
     private Button      hintButton;
     private boolean     hintUseState = true;
+    private FlowPane BoxOfGuesses;
+    FlowPane          GuessedLettersFlowPane;
+    Pane                canvas;
+    private List<Shape>     hangmanProgress;
+
+    String alphabetString = "abcdefghijklmnopqrstuvwxyz";
+    char[] alphabetCharArray = alphabetString.toCharArray();
+
 
     public HangmanController(AppTemplate appTemplate, Button gameButton) {
         this(appTemplate);
@@ -120,12 +137,32 @@ public class HangmanController implements FileController {
         discovered = 0;
         hintUseState = true;
 
+
         Workspace gameWorkspace = (Workspace) appTemplate.getWorkspaceComponent();
 
         gamedata.init();
         setGameState(GameState.INITIALIZED_UNMODIFIED);
         HBox remainingGuessBox = gameWorkspace.getRemainingGuessBox();
         HBox guessedLetters    = (HBox) gameWorkspace.getGameTextsPane().getChildren().get(1);
+        GuessedLettersFlowPane = (FlowPane) gameWorkspace.getGameTextsPane().getChildren().get(2);
+        GuessedLettersFlowPane.setPrefWrapLength(200.0);
+        GuessedLettersFlowPane.setStyle("-fx-background-color: Transparent;");
+
+        makeHangmanCanvas();
+
+        for(int i = 0;i< alphabetCharArray.length;i++)
+        {
+            StackPane stack = new StackPane();
+            /*stack.setPrefSize(Region.USE_PREF_SIZE,Region.USE_PREF_SIZE);*/
+            stack.setStyle("-fx-padding: 5;");
+            Rectangle rect = new Rectangle(30.0,30.0);
+            /*stack.setMargin(rect,new Insets(5.0,5.0,5.0,5.0));*/
+            rect.setFill(Color.ORANGE);
+            Text letter = new Text(Character.toString(alphabetCharArray[i]));
+            letter.setFill(Color.MIDNIGHTBLUE);
+            stack.getChildren().addAll(rect,letter);
+            GuessedLettersFlowPane.getChildren().add(i,stack);
+        }
         remains = new Label(Integer.toString(GameData.TOTAL_NUMBER_OF_GUESSES_ALLOWED));
         remainingGuessBox.getChildren().addAll(new Label("Remaining Guesses: "), remains);
         initWordGraphics(guessedLetters);
@@ -137,7 +174,58 @@ public class HangmanController implements FileController {
 
     }
 
+    public void makeHangmanCanvas()
+    {
+        Workspace gameWorkspace = (Workspace) appTemplate.getWorkspaceComponent();
 
+        canvas = new Pane();
+        canvas.setStyle("-fx-border-color: black;");
+        canvas.setMinHeight(400.0);
+        canvas.setMinWidth(300.0);
+
+        Circle circle = new Circle(50.0);
+        circle.setFill(Color.TRANSPARENT);
+        circle.setStroke(Color.BLACK);
+        circle.setCenterX(canvas.getMinWidth()/2);
+        circle.setCenterY(canvas.getMinHeight()/4);
+        //circle.setVisible(false);
+        Line body = new Line(circle.getCenterX(),circle.getCenterY()+50.0,circle.getCenterX(),circle.getCenterY()+150.0);
+        //body.setVisible(false);
+        Line rightLeg = new Line(body.getEndX(),body.getEndY(),body.getEndX()+50.0,body.getEndY()+50.0);
+       // rightLeg.setVisible(false);
+        Line leftLeg = new Line(body.getEndX(),body.getEndY(),body.getEndX()-50.0,body.getEndY()+50.0);
+        //leftLeg.setVisible(false);
+        Line rightArm = new Line(body.getStartX(),body.getStartY()+10.0,body.getStartX()+50.0,body.getStartY()+50.0);
+        //rightArm.setVisible(false);
+        Line leftArm = new Line(body.getStartX(),body.getStartY()+10.0,body.getStartX()-50.0,body.getStartY()+50.0);
+        //leftArm.setVisible(false);
+        Line hang1 = new Line(circle.getCenterX(),circle.getCenterY()-50.0,circle.getCenterX(),circle.getCenterY()-70.0);
+        //hang1.setVisible(false);
+        Line hang2 = new Line(hang1.getEndX(),hang1.getEndY(),hang1.getEndX()-70.0,hang1.getEndY());
+        //hang2.setVisible(false);
+        Line hang3 = new Line(hang2.getEndX(),hang2.getEndY(),hang2.getEndX(),hang2.getEndY()+300.0);
+        //hang3.setVisible(false);
+        Line hang4 = new Line(hang3.getEndX()-150.0,hang3.getEndY(),hang3.getEndX()+300.0,hang3.getEndY());
+        //hang4.setVisible(false);
+        hangmanProgress = new ArrayList();
+        hangmanProgress.add(circle);
+        hangmanProgress.add(body);
+        hangmanProgress.add(rightLeg);
+        hangmanProgress.add(leftLeg);
+        hangmanProgress.add(rightArm);
+        hangmanProgress.add(leftArm);
+        hangmanProgress.add(hang1);
+        hangmanProgress.add(hang2);
+        hangmanProgress.add(hang3);
+        hangmanProgress.add(hang4);
+
+        for(int i =0;i<hangmanProgress.size();i++)
+        {
+            hangmanProgress.get(i).setVisible(false);
+        }
+        canvas.getChildren().addAll(circle,body,rightLeg,leftLeg,rightArm,leftArm,hang1,hang2,hang3,hang4);
+        gameWorkspace.getFigurePane().setCenter(canvas);
+    }
 
     public void getHint()
     {
@@ -150,11 +238,26 @@ public class HangmanController implements FileController {
         while(notUsedLetter == false) {
 
                 int index = (int) (Math.random() * targetWord.length());
+
                 if (!gamedata.getGoodGuesses().contains(charTarget[index])) {
                     notUsedLetter = true;
-                    progress[index].setVisible(true);
-                    gamedata.addGoodGuess(charTarget[index]);
-                    discovered++;
+                    for(int i = 0;i<progress.length;i++)
+                    {
+                        if(gamedata.getTargetWord().charAt(i) == charTarget[index]) {
+                            progress[i].setVisible(true);
+                            discovered++;
+                        }
+                    }
+                    int letterIndex = (int)charTarget[index] - 97;
+                    StackPane fill = new StackPane();
+                    Rectangle recta = new Rectangle(30.0,30.0,Color.RED);
+
+                    fill.setStyle("-fx-padding: 5;");
+                    fill.getChildren().addAll(recta,new Text(Character.toString(charTarget[index])));
+                    GuessedLettersFlowPane.getChildren().remove(letterIndex);
+                    GuessedLettersFlowPane.getChildren().add(letterIndex,fill);
+                    hangmanProgress.get(0).setVisible(true);
+                    hangmanProgress.remove(0);
                     gamedata.decreaseRemains();
                 }
             }
@@ -164,14 +267,21 @@ public class HangmanController implements FileController {
     private void end() {
         appTemplate.getGUI().getPrimaryScene().setOnKeyTyped(null);
         gameButton.setDisable(true);
+        disableHintButton();
+        for(int i =0;i<gamedata.getTargetWord().length();i++)
+        {
+            progress[i].setVisible(true);
+            /*if(!gamedata.getGoodGuesses().contains(progress[i].getText().charAt(0)))*/
+            if(!alreadyGuessed(progress[i].getText().charAt(0)))
+            progress[i].setFill(Color.RED);
+        }
         setGameState(GameState.ENDED);
         appTemplate.getGUI().updateWorkspaceToolbar(gamestate.equals(GameState.INITIALIZED_MODIFIED));
         Platform.runLater(() -> {
             PropertyManager           manager    = PropertyManager.getManager();
             AppMessageDialogSingleton dialog     = AppMessageDialogSingleton.getSingleton();
             String                    endMessage = manager.getPropertyValue(success ? GAME_WON_MESSAGE : GAME_LOST_MESSAGE);
-            if (!success)
-                endMessage += String.format(" (the word was \"%s\")", gamedata.getTargetWord());
+
             if (dialog.isShowing())
                 dialog.toFront();
             else
@@ -198,13 +308,18 @@ public class HangmanController implements FileController {
 
     public void play() {
         disableGameButton();
+
         AnimationTimer timer = new AnimationTimer() {
             @Override
             public void handle(long now) {
+
                 appTemplate.getGUI().updateWorkspaceToolbar(gamestate.equals(GameState.INITIALIZED_MODIFIED));
                 appTemplate.getGUI().getPrimaryScene().setOnKeyTyped((KeyEvent event) -> {
+
                     char guess = event.getCharacter().charAt(0);
 
+                    if(Character.isLetter(guess)&& Character.isLowerCase(guess))
+                    {
                     if (!alreadyGuessed(guess)) {
                         boolean goodguess = false;
                         for (int i = 0; i < progress.length; i++) {
@@ -213,14 +328,31 @@ public class HangmanController implements FileController {
                                 gamedata.addGoodGuess(guess);
                                 goodguess = true;
                                 discovered++;
+
                             }
                         }
-                        if (!goodguess)
-                            gamedata.addBadGuess(guess);
+                        if (!goodguess) {
+                                hangmanProgress.get(0).setVisible(true);
+                                hangmanProgress.remove(0);
+                                gamedata.addBadGuess(guess);
+
+                        }
+
+                        int index = (int)guess - 97;
+
+                        StackPane fill = new StackPane();
+                        Rectangle recta = new Rectangle(30.0,30.0,Color.RED);
+
+                        fill.setStyle("-fx-padding: 5;");
+                        fill.getChildren().addAll(recta,new Text(Character.toString(guess)));
+                        GuessedLettersFlowPane.getChildren().remove(index);
+                        GuessedLettersFlowPane.getChildren().add(index,fill);
 
                         success = (discovered == progress.length);
                         remains.setText(Integer.toString(gamedata.getRemainingGuesses()));
-                    }
+                        if(gamedata.getRemainingGuesses() == 1 || gamedata.getTargetWord().length()-discovered == 1)
+                            disableHintButton();
+                    }}
                     setGameState(GameState.INITIALIZED_MODIFIED);
                 });
                 if (gamedata.getRemainingGuesses() <= 0 || success)
@@ -250,6 +382,8 @@ public class HangmanController implements FileController {
         restoreWordGraphics(guessedLetters);
 
         HBox remainingGuessBox = gameWorkspace.getRemainingGuessBox();
+
+
         remains = new Label(Integer.toString(gamedata.getRemainingGuesses()));
         remainingGuessBox.getChildren().addAll(new Label("Remaining Guesses: "), remains);
 
