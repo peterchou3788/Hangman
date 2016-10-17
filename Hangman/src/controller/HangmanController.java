@@ -307,7 +307,9 @@ public class HangmanController implements FileController {
             progress[i].setVisible(false);
             Rectangle rectangle = new Rectangle(20.0,20.0);
             rectangle.setFill(Paint.valueOf("white"));
-            StackPane.setMargin(progress[i],new Insets(10.0,10.0,10.0,10.0));
+            rectangle.setStroke(Color.BLACK);
+            stackPane.setStyle("-fx-padding: 2;");
+           /* StackPane.setMargin(progress[i],new Insets(10.0,10.0,10.0,10.0));*/
             stackPane.getChildren().addAll(rectangle,progress[i]);
             guessedLetters.getChildren().add(i,stackPane);
         }
