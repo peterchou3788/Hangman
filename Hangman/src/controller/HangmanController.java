@@ -38,7 +38,7 @@ import static settings.AppPropertyType.*;
 import static settings.InitializationParameters.APP_WORKDIR_PATH;
 
 /**
- * @author Ritwik Banerjee
+ * @author Ritwik Banerjee,Peter Chou
  */
 public class HangmanController implements FileController {
 
