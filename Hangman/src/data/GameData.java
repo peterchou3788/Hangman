@@ -44,8 +44,17 @@ public class GameData implements AppDataComponent {
         }
     }
 
+    public boolean ValidTargetWord(String word)
+    {
+        return word.matches("[a-zA-Z]+");
+    }
+
     public void init() {
         this.targetWord = setTargetWord();
+        while(ValidTargetWord(targetWord) == false)
+        {
+          this.targetWord = setTargetWord();
+        }
         this.goodGuesses = new HashSet<>();
         this.badGuesses = new HashSet<>();
         this.remainingGuesses = TOTAL_NUMBER_OF_GUESSES_ALLOWED;

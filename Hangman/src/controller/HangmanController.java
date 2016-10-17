@@ -144,11 +144,29 @@ public class HangmanController implements FileController {
         setGameState(GameState.INITIALIZED_UNMODIFIED);
         HBox remainingGuessBox = gameWorkspace.getRemainingGuessBox();
         HBox guessedLetters    = (HBox) gameWorkspace.getGameTextsPane().getChildren().get(1);
+
+
+        makeHangmanCanvas();
+        makeGuessedLetters();
+
+        remains = new Label(Integer.toString(GameData.TOTAL_NUMBER_OF_GUESSES_ALLOWED));
+        remainingGuessBox.getChildren().addAll(new Label("Remaining Guesses: "), remains);
+        initWordGraphics(guessedLetters);
+        play();
+        if((int)gamedata.getTargetWord().chars().distinct().count()>=7)
+            enableHintButton();
+        else
+            disableHintButton();
+
+    }
+
+    public void makeGuessedLetters()
+    {
+        Workspace gameWorkspace = (Workspace)appTemplate.getWorkspaceComponent();
         GuessedLettersFlowPane = (FlowPane) gameWorkspace.getGameTextsPane().getChildren().get(2);
         GuessedLettersFlowPane.setPrefWrapLength(200.0);
         GuessedLettersFlowPane.setStyle("-fx-background-color: Transparent;");
 
-        makeHangmanCanvas();
 
         for(int i = 0;i< alphabetCharArray.length;i++)
         {
@@ -163,17 +181,7 @@ public class HangmanController implements FileController {
             stack.getChildren().addAll(rect,letter);
             GuessedLettersFlowPane.getChildren().add(i,stack);
         }
-        remains = new Label(Integer.toString(GameData.TOTAL_NUMBER_OF_GUESSES_ALLOWED));
-        remainingGuessBox.getChildren().addAll(new Label("Remaining Guesses: "), remains);
-        initWordGraphics(guessedLetters);
-        play();
-        if((int)gamedata.getTargetWord().chars().distinct().count()>=7)
-            enableHintButton();
-        else
-            disableHintButton();
-
     }
-
     public void makeHangmanCanvas()
     {
         Workspace gameWorkspace = (Workspace) appTemplate.getWorkspaceComponent();
@@ -382,7 +390,10 @@ public class HangmanController implements FileController {
         restoreWordGraphics(guessedLetters);
 
         HBox remainingGuessBox = gameWorkspace.getRemainingGuessBox();
-
+        makeHangmanCanvas();
+        restoreHangmanGraphics();
+        makeGuessedLetters();
+        restoreGuessedLetters();
 
         remains = new Label(Integer.toString(gamedata.getRemainingGuesses()));
         remainingGuessBox.getChildren().addAll(new Label("Remaining Guesses: "), remains);
@@ -406,6 +417,32 @@ public class HangmanController implements FileController {
             guessedLetters.getChildren().add(i,stackPane);
             if (progress[i].isVisible())
                 discovered++;
+        }
+    }
+
+    public void restoreHangmanGraphics()
+    {
+       int badGuesses = gamedata.getBadGuesses().size();
+        for(int i = 0;i<badGuesses;i++)
+        {
+            hangmanProgress.get(i).setVisible(true);
+        }
+    }
+
+    public void restoreGuessedLetters()
+    {
+        for(int i =0;i<alphabetCharArray.length;i++) {
+            if(alreadyGuessed(alphabetCharArray[i])) {
+                char letterGuessed = alphabetCharArray[i];
+                StackPane fill = new StackPane();
+                Rectangle recta = new Rectangle(30.0, 30.0, Color.RED);
+
+                fill.setStyle("-fx-padding: 5;");
+                fill.getChildren().addAll(recta, new Text(Character.toString(letterGuessed)));
+                int index = letterGuessed - 97;
+                GuessedLettersFlowPane.getChildren().remove(index);
+                GuessedLettersFlowPane.getChildren().add(index, fill);
+            }
         }
     }
 
@@ -482,6 +519,8 @@ public class HangmanController implements FileController {
             File selectedFile = filechooser.showOpenDialog(appTemplate.getGUI().getWindow());
             if (selectedFile != null && selectedFile.exists())
                 load(selectedFile.toPath());
+            else
+                return;
             restoreGUI(); // restores the GUI to reflect the state in which the loaded game was last saved
         }
     }
